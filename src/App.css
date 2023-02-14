@@ -3,3 +3,18 @@
     padding: 0%;
 }
 
+.app{
+    height: 100vh;
+    width: 100vw;
+}
+
+.clock{
+    height: auto;
+    width: auto;
+    border: 1px solid blue;
+}
+
+.timer-settings{
+    height: 500px;
+    width: 500px;
+}

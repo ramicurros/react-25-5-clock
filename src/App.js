@@ -1,20 +1,26 @@
+import { useState } from 'react'
 import './App.css';
 import TimerSettings from './components/timerSettings';
 import TimeDisplay from './components/timeDisplay';
-import Buttons from './components/buttons';
+
 
 function App() {
+
+  const [sessionMinutes, setSession] = useState(25);
+  const [breakMinutes, setBreak] = useState(5);
+
   return (
-    <div id='App' className='d-flex  app'>
-      <div id='clock'>
-        <div id='timer-settings'>
-          <TimerSettings />
+    <div id='App' className='d-flex flex-column justify-content-center align-content-center app'>
+      <div id='clock' className='d-flex flex-column justify-content-center align-content-center clock'>
+        <div id='timer-settings' className='d-flex timer-settings'>
+          <TimerSettings sessionState={sessionMinutes} breakState={breakMinutes} setSession={setSession} setBreak={setBreak} />
         </div>
         <div id='time-display'>
-          <TimeDisplay />
+          <TimeDisplay sessionState={sessionMinutes} breakState={breakMinutes} />
         </div>
         <div id='buttons'>
-          <Buttons />
+          <div id='start-stop'></div>
+          <div id='reset'></div>
         </div>
       </div>
     </div>
