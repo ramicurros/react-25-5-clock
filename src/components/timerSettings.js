@@ -6,7 +6,7 @@ function TimerSettings({breakState, sessionState, setBreak, setSession}) {
     }
 
     function decrement(state, setState){
-        if(state > 0)setState(state - 1);
+        if(state > 1)setState(state - 1);
         return state;
     }
 
@@ -18,7 +18,7 @@ function TimerSettings({breakState, sessionState, setBreak, setSession}) {
                 <div>{breakState}</div>
                 <div id='break-decrement' onClick={() => {decrement(breakState, setBreak)}}>-</div>
             </div>
-            <div id='session    '>
+            <div id='session'>
                 <div id='session-label'>Session Length</div>
                 <div id='session-increment' onClick={() => {increment(sessionState, setSession)}}>+</div>
                 <div>{sessionState}</div>
