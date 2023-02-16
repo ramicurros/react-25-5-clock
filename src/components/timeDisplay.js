@@ -3,7 +3,6 @@ import { useState } from 'react'
 function TimeDisplay({ breakState, sessionState, playState }) {
 
     let intervalId
-    let intervalId2
 
     const [minutes, setMinutes] = useState(`${sessionState}`)
     const [seconds, setSeconds] = useState(`00`);
@@ -15,9 +14,12 @@ function TimeDisplay({ breakState, sessionState, playState }) {
     }
 
     function secondLess() {
-        if (parseFloat(seconds) >= 10) setSeconds(`${seconds - 1}`);
-        if (parseFloat(seconds) < 10 && parseFloat(seconds) >= 1) setSeconds(`0${seconds - 1}`);
-        if (parseFloat(seconds) < 0) setSeconds(`59`);
+        if (parseFloat(seconds) >= 10) {setSeconds(`${seconds - 1}`)} 
+        if (parseFloat(seconds) < 10 && parseFloat(seconds) >= 1){setSeconds(`0${seconds - 1}`)}
+        if (parseFloat(seconds) <= 0) {
+            setSeconds('59');
+            minuteLess();
+        }
     }
 
     if (parseFloat(seconds) === 0 && minutes === 0) {
@@ -32,11 +34,9 @@ function TimeDisplay({ breakState, sessionState, playState }) {
     }
 
     if(playState){
-        intervalId = setInterval(minuteLess, 60000);
-        intervalId2 = setInterval(secondLess, 1000);
+        intervalId = setInterval(secondLess, 1000);
     }else{
         clearInterval(intervalId);
-        clearInterval(intervalId2);
     }
 
     return (
