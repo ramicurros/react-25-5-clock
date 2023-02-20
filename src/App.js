@@ -1,7 +1,7 @@
-import { useState, useReducer } from 'react'
+import { useState, useReducer, useEffect } from 'react'
 import './App.css';
 import TimerSettings from './components/timerSettings';
-import TimeDisplay from './components/timeDisplay';
+import TimerDisplay from './components/timerDisplay';
 
 export const ACTIONS = {
   INCREMENT_SESSION: 'increment_session',
@@ -9,15 +9,16 @@ export const ACTIONS = {
   DECREMENT_SESSION: 'decrement_session',
   DECREMENT_BREAK: 'decrement_break',
   SET_MINUTES: 'set_minutes',
-  START_COUNTDOWN: 'start_countdown',
+  COUNTDOWN: 'countdown',
+  STOP_COUNTDOWN: 'stop_countdown',
   SET_COUNTDOWN: 'set_countdown',
   SET_PLAY_STOP: 'set_play_stop'
 }
 
 
+
 function reducer(state, { type, payload }) {
 
-  let intervalId;
 
   switch (type) {
     case ACTIONS.INCREMENT_SESSION: if (state.sessionTime === 60) return state;
@@ -26,7 +27,7 @@ function reducer(state, { type, payload }) {
 
     case ACTIONS.INCREMENT_BREAK: if (state.breakTime === 60) return state;
 
-      return { ...state, breakTime: state.breakTime + 1, breakMinutes: `${state.breakTime + 1}`, minutesInDisplay: `${state.sessionTime}`, seconds: '00' };
+      return { ...state, breakTime: state.breakTime + 1, breakMinutes: `${state.breakTime + 1}`, minutesInDisplay: `${state.sessionTime}  `, seconds: '00' };
 
     case ACTIONS.DECREMENT_SESSION: if (state.sessionTime === 1) return state;
 
@@ -36,56 +37,81 @@ function reducer(state, { type, payload }) {
 
       return { ...state, breakTime: state.breakTime - 1, breakMinutes: `${state.breakTime - 1}`, minutesInDisplay: `${state.sessionTime}`, seconds: '00' };
 
-    case ACTIONS.START_COUNTDOWN: if (state.play_stop) {
-      return intervalId = setInterval(secondLess(state.seconds, state.minutesInDisplay), 1000);
+    case ACTIONS.SET_DISPLAY: if(payload.session === 'session')
+      return {...state, minutesInDisplay: Math.round(payload.inSeconds / 60000)}
     }
-    return state;
-
-    case ACTIONS.SET_COUNTDOWN: if (parseFloat(state.sessionMinutes) < 0) return { ...state, sessionMinutes: `${state.sessionTime}`, minutesInDisplay: state.breakMinutes };
-
-      if (parseFloat(state.breakMinutes) < 0) return { ...state, breakMinutes: `${state.breakTime}`, minutesInDisplay: state.sessionMinutes };
-
-    case ACTIONS.SET_PLAY_STOP: if (state.play_stop) {clearInterval(intervalId); return { ...state, play_stop: false }}
-
-      return { ...state, play_stop: true };
   }
-}
 
-function minuteLess(minutes) {
-  if (parseFloat(minutes) >= 10) return minutes = `${minutes - 1}`;
-  if (parseFloat(minutes) < 10) return minutes = `0${minutes - 1}`;
-}
 
-function secondLess(seconds, minutes) {
-  if (parseFloat(seconds) >= 10) return seconds = `${seconds - 1}`
-  if (parseFloat(seconds) < 10 && parseFloat(seconds) >= 1) return seconds = `0${seconds - 1}`
-  if (parseFloat(seconds) <= 0) {
-    seconds = '59';
-    minuteLess(minutes);
-  }
-}
 
 function App() {
 
-  const [{ sessionTime, breakTime, minutesInDisplay, seconds, play_stop}, dispatch] = useReducer(reducer, {sessionTime: 25, breakTime: 5, minutesInDisplay: '25', seconds: '00', play_stop: false})
+  const [{ sessionTime, breakTime, minutesInDisplay, seconds }, dispatch] = useReducer(reducer, { sessionTime: 25, breakTime: 5, minutesInDisplay: '25', seconds: '00', sessionEnded: false, play_stop: false })
 
-  function countDownFunction(action1, action2, action3){
-      dispatch({type: action1});
-      dispatch({type: action2});
-      dispatch({type: action3});
-  }
+  const [play_stop, setPlay_stop] = useState(false);
+
+  const [time, setTime] = useState();
+  const [session, setSession] = useState('session');
+  const [countdown, setCountdown] = useState();
+  const [inSeconds, setInSeconds] = useState(0);
+  const [intervalId, setIntervalId] = useState();
+
+
+
+  useEffect(() => {
+    let id;
+    if (play_stop) {
+      let t;
+      t = new Date();
+      if(session === 'session'){
+        t.setSeconds(t.getSeconds() + (sessionTime * 60000))
+      }
+      else if(session === 'break'){
+        t.setSeconds(t.getSeconds() + (breakTime * 60000))
+      };
+        setTime(t.valueOf());
+      if (time)
+        id = setInterval(() => {
+          setCountdown(new Date().valueOf())
+        }, 100)
+      setIntervalId(id);
+    } else {
+      clearInterval(id);
+    }
+    return () => {
+      clearInterval(id);
+    }
+  }, [play_stop, time]);
+
+  useEffect(() => {
+    if (time && countdown) {
+      const timeInSeconds = Math.floor((time - countdown) / 1000);
+      if (inSeconds !== timeInSeconds) {
+        setInSeconds(timeInSeconds);
+      }
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    console.log(Math.round(inSeconds / 60000))
+    if (inSeconds <=  0) {
+      clearInterval(intervalId);
+      setSession('break');
+    }
+  }, [inSeconds])
+
 
   return (
     <div id='App' className='d-flex flex-column justify-content-center align-content-center app'>
       <div id='clock' className='d-flex flex-column justify-content-center align-content-center clock'>
         <div id='timer-settings' className='d-flex timer-settings'>
-          <TimerSettings dispatch={dispatch} sessionTime={sessionTime} breakTime={breakTime}/>
+          <TimerSettings dispatch={dispatch} sessionTime={sessionTime} breakTime={breakTime} />
         </div>
         <div id='time-display'>
-          <TimeDisplay minutesInDisplay={minutesInDisplay} secondsInDisplay={seconds}/>
+          <TimerDisplay minutesInDisplay={minutesInDisplay} secondsInDisplay={seconds} />
         </div>
         <div id='buttons'>
-          <div id='start-stop' onClick={() => countDownFunction(ACTIONS.SET_PLAY_STOP, ACTIONS.SET_COUNTDOWN, ACTIONS.START_COUNTDOWN)}>start-stop</div>
+          <div id='start-stop' onClick={() => { setPlay_stop(!play_stop);}}>start-stop</div>
           <div id='reset'>reset</div>
         </div>
       </div>
