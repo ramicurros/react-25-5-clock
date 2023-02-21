@@ -8,11 +8,7 @@ export const ACTIONS = {
   INCREMENT_BREAK: 'increment_break',
   DECREMENT_SESSION: 'decrement_session',
   DECREMENT_BREAK: 'decrement_break',
-  SET_MINUTES: 'set_minutes',
-  COUNTDOWN: 'countdown',
-  STOP_COUNTDOWN: 'stop_countdown',
-  SET_COUNTDOWN: 'set_countdown',
-  SET_PLAY_STOP: 'set_play_stop'
+  SET_DISPLAY: 'set_display'
 }
 
 
@@ -22,25 +18,55 @@ function reducer(state, { type, payload }) {
 
   switch (type) {
     case ACTIONS.INCREMENT_SESSION: if (state.sessionTime === 60) return state;
-
-      return { ...state, sessionTime: state.sessionTime + 1, sessionMinutes: `${state.sessionTime + 1}`, minutesInDisplay: `${state.sessionTime + 1}`, seconds: '00' };
+      if (state.sessionTime < 9) {
+        return { ...state, sessionTime: state.sessionTime + 1, sessionMinutes: `${state.sessionTime + 1}`, minutesInDisplay: `0${state.sessionTime + 1}`, seconds: '00' };
+      } else {
+        return { ...state, sessionTime: state.sessionTime + 1, sessionMinutes: `${state.sessionTime + 1}`, minutesInDisplay: `${state.sessionTime + 1}`, seconds: '00' };
+      }
 
     case ACTIONS.INCREMENT_BREAK: if (state.breakTime === 60) return state;
-
-      return { ...state, breakTime: state.breakTime + 1, breakMinutes: `${state.breakTime + 1}`, minutesInDisplay: `${state.sessionTime}  `, seconds: '00' };
+      if (state.breakTime < 9) {
+        return { ...state, breakTime: state.breakTime + 1, breakMinutes: `0${state.breakTime + 1}`, seconds: '00' };
+      } else {
+        return { ...state, breakTime: state.breakTime + 1, breakMinutes: `${state.breakTime + 1}`, seconds: '00' };
+      }
 
     case ACTIONS.DECREMENT_SESSION: if (state.sessionTime === 1) return state;
-
-      return { ...state, sessionTime: state.sessionTime - 1, sessionMinutes: `${state.sessionTime - 1}`, minutesInDisplay: `${state.sessionTime - 1}`, seconds: '00' };
+      if (state.sessionTime <= 10) {
+        return { ...state, sessionTime: state.sessionTime - 1, sessionMinutes: `${state.sessionTime + 1}`, minutesInDisplay: `0${state.sessionTime - 1}`, seconds: '00' };
+      } else {
+        return { ...state, sessionTime: state.sessionTime - 1, sessionMinutes: `${state.sessionTime + 1}`, minutesInDisplay: `${state.sessionTime - 1}`, seconds: '00' };
+      }
 
     case ACTIONS.DECREMENT_BREAK: if (state.breakTime === 1) return state;
 
-      return { ...state, breakTime: state.breakTime - 1, breakMinutes: `${state.breakTime - 1}`, minutesInDisplay: `${state.sessionTime}`, seconds: '00' };
+      if (state.breakTime <= 10) {
+        return { ...state, breakTime: state.breakTime - 1, breakMinutes: `0${state.breakTime - 1}`, seconds: '00' };
+      } else {
+        return { ...state, breakTime: state.breakTime - 1, breakMinutes: `${state.breakTime - 1}`, seconds: '00' };
+      }
 
-    case ACTIONS.SET_DISPLAY: if(payload.session === 'session')
-      return {...state, minutesInDisplay: Math.round(payload.inSeconds / 60000)}
-    }
+    case ACTIONS.SET_DISPLAY: let inDisplaySeconds;
+      let inDisplayMinutes;
+      let seconds = payload.seconds % 60;
+      let minutes = Math.floor(payload.seconds / 60);
+      if (payload.play_stop) {
+        if (seconds < 10) {
+          inDisplaySeconds = `0${seconds}`;
+        } else {
+          inDisplaySeconds = seconds;
+        }
+        if (minutes < 10) {
+          inDisplayMinutes = `0${minutes}`;
+        } else {
+          inDisplayMinutes = minutes;
+        }
+        return { ...state, minutesInDisplay: inDisplayMinutes, seconds: inDisplaySeconds }
+      } else {
+        return state;
+      }
   }
+}
 
 
 
@@ -49,9 +75,9 @@ function App() {
   const [{ sessionTime, breakTime, minutesInDisplay, seconds }, dispatch] = useReducer(reducer, { sessionTime: 25, breakTime: 5, minutesInDisplay: '25', seconds: '00', sessionEnded: false, play_stop: false })
 
   const [play_stop, setPlay_stop] = useState(false);
-
+  const [reset, setReset] = useState(false);
   const [time, setTime] = useState();
-  const [session, setSession] = useState('session');
+  const [sessionEnd, setSessionEnd] = useState(true);
   const [countdown, setCountdown] = useState();
   const [inSeconds, setInSeconds] = useState(0);
   const [intervalId, setIntervalId] = useState();
@@ -60,45 +86,61 @@ function App() {
 
   useEffect(() => {
     let id;
-    if (play_stop) {
-      let t;
-      t = new Date();
-      if(session === 'session'){
-        t.setSeconds(t.getSeconds() + (sessionTime * 60000))
+    let t;
+    t = new Date();
+    if (inSeconds === 0) {
+      if (sessionEnd) {
+        t.setSeconds(t.getSeconds() + (breakTime * 60))
       }
-      else if(session === 'break'){
-        t.setSeconds(t.getSeconds() + (breakTime * 60000))
+      else {
+        t.setSeconds(t.getSeconds() + (sessionTime * 60))
       };
-        setTime(t.valueOf());
-      if (time)
-        id = setInterval(() => {
-          setCountdown(new Date().valueOf())
-        }, 100)
-      setIntervalId(id);
     } else {
-      clearInterval(id);
+      t.setSeconds(t.getSeconds() + inSeconds);
     }
+    setTime(t.valueOf());
+
+    if (time)
+      id = setInterval(() => {
+        setCountdown(new Date().valueOf())
+      }, 100)
+    setIntervalId(id);
+
+
     return () => {
       clearInterval(id);
     }
-  }, [play_stop, time]);
+  }, [reset, play_stop, time, sessionEnd]);
 
   useEffect(() => {
-    if (time && countdown) {
-      const timeInSeconds = Math.floor((time - countdown) / 1000);
-      if (inSeconds !== timeInSeconds) {
-        setInSeconds(timeInSeconds);
+    if (play_stop) {
+      if (time && countdown) {
+        const timeInSeconds = Math.floor((time - countdown) / 1000);
+        if (inSeconds !== timeInSeconds) {
+          setInSeconds(timeInSeconds);
+        }
       }
-    }
+    } else { clearInterval(intervalId) };
   }, [countdown]);
 
   useEffect(() => {
-    console.log(Math.round(inSeconds / 60000))
-    if (inSeconds <=  0) {
+    console.log(Math.round(inSeconds))
+    console.log(inSeconds % 60)
+    dispatch({ type: ACTIONS.SET_DISPLAY, payload: { seconds: inSeconds, play_stop: play_stop } })
+    if (inSeconds <= 0) {
       clearInterval(intervalId);
-      setSession('break');
+      if (sessionEnd) {
+        setTimeout(() => {
+          setSessionEnd(false)
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          setSessionEnd(true)
+        }, 1000);
+      }
     }
   }, [inSeconds])
+
 
 
   return (
@@ -111,8 +153,8 @@ function App() {
           <TimerDisplay minutesInDisplay={minutesInDisplay} secondsInDisplay={seconds} />
         </div>
         <div id='buttons'>
-          <div id='start-stop' onClick={() => { setPlay_stop(!play_stop);}}>start-stop</div>
-          <div id='reset'>reset</div>
+          <div id='start-stop' onClick={() => { setPlay_stop(!play_stop); }}>start-stop</div>
+          <div id='reset' onClick={() => { setReset(!reset) }}>reset</div>
         </div>
       </div>
     </div>
