@@ -1,20 +1,124 @@
-*{
+* {
     margin: 0%;
     padding: 0%;
 }
 
-.app{
+.app {
     height: 100vh;
     width: 100vw;
+    background-color: #1d2020;
+    font-family: 'Andika', sans-serif;
+    font-family: 'Anybody', cursive;
+    font-family: 'Comfortaa', cursive;
+    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Montserrat', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
+    font-family: 'Roboto Mono', monospace;
 }
 
-.clock{
+.clock {
     height: auto;
     width: auto;
-    border: 1px solid blue;
+    padding: 20px;
+    border: 1px solid #333636;
+    box-shadow: 3px 3px 19px 0px rgba(82, 77, 77, 0.25);
+    -webkit-box-shadow: 3px 3px 19px 0px rgba(82, 77, 77, 0.25);
+    -moz-box-shadow: 3px 3px 19px 0px rgba(82, 77, 77, 0.25);
+    background: radial-gradient(circle, rgb(39, 41, 41) 85%, rgb(44, 46, 46) 100%);
 }
 
-.timer-settings{
-    height: 500px;
+.timer-settings {
+    height: 140px;
     width: 500px;
+}
+
+.break {
+    margin: 10px 60px;
+}
+
+.session {
+    margin: 10px 60px;
+}
+
+.settings-label {
+    height: auto;
+    width: auto;
+}
+
+.settings-display {
+    height: 25px;
+    width: 35px;
+    margin: 10px;
+    background: #272929;
+    box-shadow: inset 3px 3px 6px #141515,
+        inset -3px -3px 6px #3b3e3e;
+}
+
+.time-display {
+    height: 120px;
+    width: 500px;
+    margin: 15px;
+}
+
+.time-left {
+    height: auto;
+    width: 150px;
+    padding: 10px;
+    font-size: 35px;
+    margin: 10px;
+    background: #272929;
+    box-shadow: inset 5px 5px 10px #141515,
+        inset -5px -5px 10px #3b3e3e;
+}
+
+.timer-label {
+    font-size: 18px;
+}
+
+.buttons {
+    height: 100px;
+    width: auto;
+}
+
+.start_stop_reset_btns {
+    height: 50px;
+    width: 60px;
+    border-radius: 20%;
+    padding: 5px;
+    margin: 35px;
+    color: #FFEAEC;
+    background: #272929;
+    box-shadow: 3px 3px 7px #1b1c1c,
+        -3px -3px 7px #333636;
+}
+
+.play-logo{
+    height: 60px;
+    width: 75px;
+}
+
+.reset-logo{
+    height: 20px;
+    width: 20px;
+}
+
+
+.brightColor {
+    color: #EAF27C;
+}
+
+.settings-btn {
+    height: 25px;
+    width: 25px;
+    margin: 5px;
+    border-radius: 50%;
+    color: #FFEAEC;
+    background: linear-gradient(145deg, #2a2c2c, #232525);
+    box-shadow: 3px 3px 5px #1c1e1e,
+        -3px -3px 5px #323434;
+}
+
+.clock-btns:active{
+    transition: all 0.1s;
+    background-color: #1d2020;
 }
