@@ -75,15 +75,15 @@ function App() {
   const [{ sessionTime, breakTime, minutesInDisplay, seconds }, dispatch] = useReducer(reducer, { sessionTime: 25, breakTime: 5, minutesInDisplay: '25', seconds: '00', sessionEnded: false })
 
   const [play_stop, setPlay_stop] = useState(false);
+  const [reset, setReset] = useState(false)
   const [time, setTime] = useState();
-  const [sessionEnd, setSessionEnd] = useState(true);
+  const [sessionEnd, setSessionEnd] = useState(false);
   const [countdown, setCountdown] = useState();
-  const [inSeconds, setInSeconds] = useState(0);
+  const [inSeconds, setInSeconds] = useState(sessionTime * 60);
   const [intervalId, setIntervalId] = useState();
 
 
   const handleReset = () => { 
-    setPlay_stop(false);
     setTime(undefined);
     setSessionEnd(false);
     setCountdown(undefined);
@@ -91,6 +91,10 @@ function App() {
     clearInterval(intervalId);
   };
 
+  useEffect(() =>{
+    handleReset();
+    dispatch({ type: ACTIONS.SET_DISPLAY, payload: { seconds: sessionTime * 60, play_stop: true } })
+  }, [sessionTime, breakTime, reset])
 
   useEffect(() => {
     let id;
@@ -161,10 +165,10 @@ function App() {
           <div id='timer-label' className='timer-label brightColor'>Session</div>
         </div>
         <div id='buttons' className='d-flex flex-row justify-content-center align-items-center buttons'>
-          <div id='start-stop' className='d-flex justify-content-center align-items-center start_stop_reset_btns clock-btns' onClick={() => { setPlay_stop(!play_stop); }}>
+          <div id='start-stop' className='d-flex justify-content-center align-items-center start_stop_reset_btns' onClick={() => { setPlay_stop(!play_stop); }}>
             <img src='https://betterbasketball.com/wp-content/uploads/2022/06/Play-video-of-Coach-Rick-Torbett-345x198.png.webp' className='play-logo'/>
           </div>
-          <div id='reset' className='d-flex justify-content-center align-items-center start_stop_reset_btns' onClick={() => { handleReset() }}>
+          <div id='reset' className='d-flex justify-content-center align-items-center start_stop_reset_btns' onClick={() => { setReset(!reset) }}>
             <img src='https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/restart-icon-18-256.png' className='reset-logo'/>
           </div>
         </div>

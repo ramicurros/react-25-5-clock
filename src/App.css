@@ -118,7 +118,15 @@
         -3px -3px 5px #323434;
 }
 
-.clock-btns:active{
+.start_stop_reset_btns:active{
     transition: all 0.1s;
     background-color: #1d2020;
+    box-shadow: 3px 3px 7px rgb(35, 36, 36) ,
+    -3px -3px 7px rgb(35, 36, 36);
+}
+
+.settings-btn:active{
+    background: #1d2020;
+    box-shadow: 3px 3px 5px rgb(35, 36, 36),
+        -3px -3px 5px rgb(35, 36, 36);
 }
