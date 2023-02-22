@@ -130,3 +130,7 @@
     box-shadow: 3px 3px 5px rgb(35, 36, 36),
         -3px -3px 5px rgb(35, 36, 36);
 }
+
+#beep{
+    display: none;
+}
