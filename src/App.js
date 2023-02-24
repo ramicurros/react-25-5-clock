@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect, useRef } from 'react'
+import { useState, useReducer, useEffect } from 'react'
 import './App.css';
 import TimerSettings from './components/timerSettings';
 
@@ -50,7 +50,8 @@ function reducer(state, { type, payload }) {
     case ACTIONS.SET_DISPLAY: let inDisplaySeconds;
       let inDisplayMinutes;
       let seconds = payload.seconds % 60;
-      let minutes = Math.floor(payload.seconds / 60);
+      let minutes = Math.floor((payload.seconds) / 60);
+      console.log(minutes )
       if (payload.play_stop) {
         if (seconds < 10) {
           inDisplaySeconds = `0${seconds}`;
@@ -75,8 +76,8 @@ function reducer(state, { type, payload }) {
 function App() {
 
   const [{ sessionTime, breakTime, minutesInDisplay, seconds }, dispatch] = useReducer(reducer, { sessionTime: 25, breakTime: 5, minutesInDisplay: '25', seconds: '00', sessionEnded: false })
-  const beep = useRef(null);
   const [play_stop, setPlay_stop] = useState(false);
+  const [label, setLabel] = useState('')
   const [time, setTime] = useState();
   const [sessionEnd, setSessionEnd] = useState(false);
   const [countdown, setCountdown] = useState();
@@ -86,6 +87,8 @@ function App() {
 
   const handleReset = () => {
     dispatch({ type: ACTIONS.RESET })
+    document.getElementById('beep').pause();
+    document.getElementById('beep').currentTime = 0;
     setPlay_stop(false);
     setTime(undefined);
     setSessionEnd(false);
@@ -107,10 +110,10 @@ function App() {
       t = new Date();
       if (inSeconds === 0) {
         if (sessionEnd) {
-          t.setSeconds(t.getSeconds() + (breakTime * 60))
+          t.setSeconds(t.getSeconds() + (breakTime * 60) + 1);
         }
         else {
-          t.setSeconds(t.getSeconds() + (sessionTime * 60))
+          t.setSeconds(t.getSeconds() + (sessionTime * 60) + 1);
         };
       } else {
         t.setSeconds(t.getSeconds() + inSeconds);
@@ -131,6 +134,11 @@ function App() {
 
   useEffect(() => {
     if (play_stop) document.getElementById('beep').play();
+    if (label === 'Session') {
+      setLabel('Break')
+    } else {
+      setLabel('Session')
+    }
   }, [sessionEnd])
 
   useEffect(() => {
@@ -164,17 +172,17 @@ function App() {
         </div>
         <div id='time-display' className='d-flex flex-column justify-content-center align-items-center time-display'>
           <div id='time-left' className='d-flex justify-content-center align-items-center time-left brightColor'>{minutesInDisplay}:{seconds}</div>
-          <div id='timer-label' className='timer-label brightColor'>Session</div>
+          <div id='timer-label' className='timer-label brightColor'>{label}</div>
         </div>
         <div id='buttons' className='d-flex flex-row justify-content-center align-items-center buttons'>
-          <div id='start-stop' className='d-flex justify-content-center align-items-center start_stop_reset_btns clock-btns' onClick={() => { setPlay_stop(!play_stop); }}>
+          <div id='start_stop' className='d-flex justify-content-center align-items-center start_stop_reset_btns clock-btns' onClick={() => { setPlay_stop(!play_stop); }}>
             <img src='https://betterbasketball.com/wp-content/uploads/2022/06/Play-video-of-Coach-Rick-Torbett-345x198.png.webp' className='play-logo' />
           </div>
           <div id='reset' className='d-flex justify-content-center align-items-center start_stop_reset_btns' onClick={() => { handleReset(); }}>
             <img src='https://iconsplace.com/wp-content/uploads/_icons/ffffff/256/png/restart-icon-18-256.png' className='reset-logo' />
           </div>
         </div>
-        <audio id='beep' ref={beep} src='https://d9olupt5igjta.cloudfront.net/samples/sample_files/42890/82a8c80b703a952aef22670910c38bbff23665c4/mp3/_censor-beep-01.mp3?1595626749'></audio>
+        <audio id='beep' src='https://d9olupt5igjta.cloudfront.net/samples/sample_files/41657/9ec2e5c02dd5aa75c4653775e486a2f46379eda3/mp3/_3.mp3?1593702124'></audio>
       </div>
     </div>
   );
